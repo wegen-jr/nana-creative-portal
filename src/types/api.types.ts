@@ -194,3 +194,40 @@ export interface ApiResponse<T> {
   message?: string;
   statusCode?: number;
 }
+
+// ==========================================
+// 6. CONTACT REQUESTS PAYLOADS (SWAGGER SPEC)
+// ==========================================
+
+export type ContactStatus = "pending" | "contacted" | "resolved";
+
+export interface ContactRequest {
+  id: string;
+  name: string;
+  phone: string;
+  companyName: string;
+  service: string;
+  message: string;
+  createdAt: string;
+  email?: string;
+  status?: ContactStatus;
+  updatedAt?: string;
+}
+
+export type ContactResponseDto = ContactRequest;
+
+export interface CreateContactDto {
+  name: string;
+  phone: string;
+  companyName: string;
+  service: string;
+  message: string;
+}
+
+export interface UpdateContactDto {
+  name?: string;
+  phone?: string;
+  companyName?: string;
+  service?: string;
+  message?: string;
+}

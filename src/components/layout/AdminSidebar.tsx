@@ -19,6 +19,7 @@ import {
   X,
   ChevronLeft,
   ChevronRight,
+  Inbox,
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 
@@ -33,6 +34,11 @@ const NAV_ITEMS: NavItem[] = [
     name: "Overview",
     href: "/admin",
     icon: LayoutDashboard,
+  },
+  {
+    name: "Contact Requests",
+    href: "/admin/contacts",
+    icon: Inbox,
   },
   {
     name: "Manage Users",

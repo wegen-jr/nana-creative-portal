@@ -12,17 +12,20 @@ import {
   Zap,
   Users,
   Sparkles,
+  Inbox,
 } from "lucide-react";
 import MetricCardsGrid from "@/components/dashboard/MetricCardsGrid";
 import BlogDrawer from "@/components/blogs/BlogDrawer";
 import { blogService } from "@/services/blogService";
 import { userService } from "@/services/userService";
-import { Post } from "@/types/api.types";
+import { contactService } from "@/services/contactService";
+import { Post, ContactRequest } from "@/types/api.types";
 import { useToast } from "@/contexts/ToastContext";
 
 export default function AdminOverviewPage() {
   const toast = useToast();
   const [posts, setPosts] = useState<Post[]>([]);
+  const [contacts, setContacts] = useState<ContactRequest[]>([]);
   const [usersCount, setUsersCount] = useState<number>(1);
   const [loading, setLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
@@ -35,13 +38,15 @@ export default function AdminOverviewPage() {
   const loadDashboardData = useCallback(async () => {
     const t0 = Date.now();
     try {
-      const [fetchedPosts, fetchedUsers] = await Promise.all([
+      const [fetchedPosts, fetchedUsers, fetchedContacts] = await Promise.all([
         blogService.getAllPosts(),
         userService.getAllUsers().catch(() => []),
+        contactService.getAllContacts().catch(() => []),
       ]);
 
       setPosts(fetchedPosts);
       setUsersCount(fetchedUsers.length > 0 ? fetchedUsers.length : 1);
+      setContacts(fetchedContacts);
       setLatencyMs(Date.now() - t0);
       setApiStatus("operational");
     } catch (err: unknown) {
@@ -106,11 +111,12 @@ export default function AdminOverviewPage() {
         </div>
       </div>
 
-      {/* Grid of 4 Minimalist Luxury Metric Cards */}
+      {/* Grid of Minimalist Luxury Metric Cards */}
       <MetricCardsGrid
         stats={{
           publishedPosts: posts.length,
           registeredUsers: usersCount,
+          contactRequests: contacts.length,
           apiStatus,
           latencyMs,
         }}
@@ -214,6 +220,75 @@ export default function AdminOverviewPage() {
               )}
             </div>
           </div>
+
+          {/* Recent Contact Inquiries Card */}
+          <div className="bg-bg-surface rounded-2xl border border-border-subtle p-6 sm:p-7 shadow-sm transition-colors">
+            <div className="flex items-center justify-between mb-6 pb-4 border-b border-border-subtle">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-brand-primary text-brand-accent flex items-center justify-center font-bold">
+                  <Inbox className="w-5 h-5" />
+                </div>
+                <div>
+                  <h2 className="text-lg font-bold text-text-primary tracking-tight">
+                    Recent Contact Inquiries
+                  </h2>
+                  <p className="text-xs text-gray-500 dark:text-gray-400">
+                    Latest client requests submitted from the public portal
+                  </p>
+                </div>
+              </div>
+
+              <Link
+                href="/admin/contacts"
+                className="text-xs font-bold text-brand-primary dark:text-brand-accent hover:underline transition-colors flex items-center gap-1 group"
+              >
+                <span>View Inbox</span>
+                <ArrowRight className="w-3.5 h-3.5 transition-transform group-hover:translate-x-1" />
+              </Link>
+            </div>
+
+            <div className="space-y-3">
+              {loading ? (
+                <div className="text-center py-8 text-sm text-gray-400 flex items-center justify-center gap-2">
+                  <RefreshCw className="w-4 h-4 animate-spin text-brand-accent" />
+                  <span>Loading inquiries...</span>
+                </div>
+              ) : contacts.length === 0 ? (
+                <div className="text-center py-8 text-sm text-gray-400">
+                  No contact requests received yet.
+                </div>
+              ) : (
+                contacts.slice(0, 3).map((inquiry) => (
+                  <Link
+                    key={inquiry.id}
+                    href="/admin/contacts"
+                    className="group p-4 rounded-xl border border-border-subtle hover:border-brand-accent/50 hover:bg-border-subtle/30 transition-all duration-200 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3"
+                  >
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center gap-2 mb-1">
+                        <span className="text-[10px] font-semibold px-2 py-0.5 rounded-md bg-brand-primary/10 dark:bg-brand-primary/30 text-brand-primary dark:text-brand-accent">
+                          {inquiry.service}
+                        </span>
+                        <span className="text-[11px] text-gray-400 font-mono">
+                          {inquiry.phone}
+                        </span>
+                      </div>
+                      <h3 className="text-sm font-bold text-text-primary group-hover:text-brand-accent truncate transition-colors">
+                        {inquiry.name} • {inquiry.companyName}
+                      </h3>
+                      <p className="text-xs text-gray-500 dark:text-gray-400 line-clamp-1 mt-0.5">
+                        {inquiry.message}
+                      </p>
+                    </div>
+
+                    <span className="px-3 py-1 rounded-lg border border-border-subtle text-xs font-semibold text-gray-500 dark:text-gray-400 group-hover:text-brand-accent group-hover:border-brand-accent/40 transition-colors shrink-0">
+                      Respond
+                    </span>
+                  </Link>
+                ))
+              )}
+            </div>
+          </div>
         </div>
 
         {/* Right 1 Column: Quick Actions & Operational Overview */}
@@ -250,6 +325,26 @@ export default function AdminOverviewPage() {
                 </div>
                 <ArrowRight className="w-3.5 h-3.5 text-gray-400 group-hover:text-brand-accent group-hover:translate-x-0.5 transition-all" />
               </button>
+
+              <Link
+                href="/admin/contacts"
+                className="w-full flex items-center justify-between p-3 rounded-xl border border-border-subtle hover:border-brand-accent/40 hover:bg-border-subtle/30 text-left transition-all duration-200 group"
+              >
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 rounded-lg bg-brand-primary/10 text-brand-accent flex items-center justify-center">
+                    <Inbox className="w-4 h-4 text-brand-accent" />
+                  </div>
+                  <div>
+                    <p className="text-xs font-bold text-text-primary group-hover:text-brand-accent transition-colors">
+                      Contact Requests
+                    </p>
+                    <p className="text-[11px] text-gray-400">
+                      Client inquiries &amp; outreach
+                    </p>
+                  </div>
+                </div>
+                <ArrowRight className="w-3.5 h-3.5 text-gray-400 group-hover:text-brand-accent group-hover:translate-x-0.5 transition-all" />
+              </Link>
 
               <Link
                 href="/admin/users"
