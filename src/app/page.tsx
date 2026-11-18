@@ -1,9 +1,5 @@
-import React from 'react'
-import LoginComponent from '@/components/auth/Login'
-export default function Login() {
-  return (
-    <div>
-      <LoginComponent />
-    </div>
-  )
+import LuxuryLogin from "@/components/auth/LuxuryLogin";
+
+export default function HomePage() {
+  return <LuxuryLogin />;
 }
