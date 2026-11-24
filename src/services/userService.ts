@@ -35,3 +35,6 @@ export const userService = {
     return response.data;
   },
 };
+
+export default userService;
+

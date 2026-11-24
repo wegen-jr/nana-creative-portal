@@ -5,6 +5,13 @@ import { useAuth } from "@/hooks/useAuth";
 
 const BREADCRUMB_MAP: Record<string, string> = {
   "/admin": "Overview",
+  "/admin/tasks": "Tasks Management",
+  "/admin/task-submissions": "Task Submissions",
+  "/admin/payroll": "Payroll (10th-of-Month)",
+  "/admin/companies": "Companies Directory",
+  "/admin/services": "Services Management",
+  "/admin/tiers": "Pricing Tiers",
+  "/admin/contacts": "Contact Requests",
   "/admin/users": "Manage Users",
   "/admin/blogs": "Blog Editor",
   "/admin/partners": "Manage Partners",

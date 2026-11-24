@@ -231,3 +231,247 @@ export interface UpdateContactDto {
   service?: string;
   message?: string;
 }
+
+// ==========================================
+// 7. COMPANIES PAYLOADS (SWAGGER SPEC)
+// ==========================================
+
+export interface Company {
+  id: string;
+  companyName: string;
+  managerName: string;
+  managerPhone: string;
+  date?: string;
+  documentUrl?: string | null;
+  documentKey?: string | null;
+  isArchived?: boolean;
+  createdAt?: string;
+  updatedAt?: string;
+  // Relational mappings if enriched via tasks or selected tier/services
+  tierId?: string;
+  serviceId?: string;
+  tierName?: string;
+  serviceNames?: string[];
+}
+
+export interface CreateCompanyDto {
+  companyName: string;
+  managerName: string;
+  managerPhone: string;
+  date?: string;
+  document?: File | Blob | null;
+}
+
+export interface UpdateCompanyDto {
+  companyName?: string;
+  managerName?: string;
+  managerPhone?: string;
+  date?: string;
+  document?: File | Blob | null;
+}
+
+// ==========================================
+// 8. SERVICES & PRICING TIERS (SWAGGER SPEC)
+// ==========================================
+
+export interface ServiceTier {
+  id: string;
+  name: string;
+  defaultRateUsd: number;
+  isActive: boolean;
+  serviceId?: string;
+  serviceCode?: string;
+  serviceName?: string;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+export interface ServiceDepartment {
+  id: string;
+  code: string;
+  name: string;
+  isActive: boolean;
+  createdAt?: string;
+  updatedAt?: string;
+  tiers?: ServiceTier[];
+  pricingTiers?: ServiceTier[];
+}
+
+export interface CreateServiceDto {
+  code: string;
+  name: string;
+}
+
+export interface UpdateServiceDto {
+  code?: string;
+  name?: string;
+  isActive?: boolean;
+}
+
+export interface CreateServiceTierDto {
+  name: string;
+  defaultRateUsd: number;
+}
+
+// ==========================================
+// 9. TASKS & CALENDAR WORKFLOW (SWAGGER SPEC)
+// ==========================================
+
+export type TaskStatus = "PENDING" | "SUBMITTED" | "REVISION" | "APPROVED";
+
+export interface TaskMetadata {
+  durationSec?: number;
+  platform?: string;
+  [key: string]: unknown;
+}
+
+export interface Task {
+  id: string;
+  companyId: string;
+  serviceId: string;
+  tierId: string;
+  assignedToId: string;
+  title: string;
+  postingDate: string;
+  postingTime: string;
+  rawAssetsUrl?: string;
+  brief?: string;
+  metadata?: TaskMetadata;
+  isUrgent?: boolean;
+  status: TaskStatus;
+  deadline?: string;
+  rateLockedUsd?: number;
+  defaultRateUsd?: number;
+  createdAt: string;
+  updatedAt: string;
+  // Populated or resolved relation bindings
+  company?: Company;
+  service?: ServiceDepartment;
+  tier?: ServiceTier;
+  assignedTo?: UserResponseDto;
+  submissions?: TaskSubmission[];
+}
+
+export interface CreateTaskDto {
+  companyId: string;
+  serviceId: string;
+  tierId: string;
+  assignedToId: string;
+  title: string;
+  postingDate: string;
+  postingTime: string;
+  rawAssetsUrl?: string;
+  brief?: string;
+  metadata?: Record<string, unknown>;
+  isUrgent?: boolean;
+}
+
+export interface SubmitLinkDto {
+  url: string;
+  notes?: string;
+}
+
+export interface RejectTaskDto {
+  adminFeedback: string;
+}
+
+// ==========================================
+// 10. TASK SUBMISSIONS (SWAGGER SPEC)
+// ==========================================
+
+export interface TaskSubmission {
+  id: string;
+  taskId: string;
+  userId?: string;
+  videoUrl?: string;
+  fileUrl?: string;
+  fileKey?: string;
+  notes?: string;
+  adminFeedback?: string;
+  status?: TaskStatus | string;
+  createdAt: string;
+  updatedAt?: string;
+  task?: Task;
+  user?: UserResponseDto;
+}
+
+export interface CreateTaskSubmissionDto {
+  taskId: string;
+  file?: File | Blob | null;
+  videoUrl?: string;
+  notes?: string;
+}
+
+export interface AddSubmissionFeedbackDto {
+  adminFeedback: string;
+}
+
+// ==========================================
+// 11. PAYROLL & FINANCIAL CYCLES (SWAGGER SPEC)
+// ==========================================
+
+export interface PayrollTaskItem {
+  taskId: string;
+  title: string;
+  companyId?: string;
+  companyName?: string;
+  staffId?: string;
+  staffName?: string;
+  staffEmail?: string;
+  rateUsd: number;
+  rateEtb?: number;
+  approvedAt?: string;
+  status?: string;
+}
+
+export interface PayrollStaffGroup {
+  staffId: string;
+  staffName: string;
+  staffEmail?: string;
+  role?: string;
+  taskCount: number;
+  totalUsd: number;
+  totalEtb: number;
+  tasks?: PayrollTaskItem[];
+}
+
+export interface PayrollClientGroup {
+  companyId: string;
+  companyName: string;
+  taskCount: number;
+  totalUsd: number;
+  totalEtb: number;
+  tasks?: PayrollTaskItem[];
+}
+
+export interface CurrentPayrollCycleResponse {
+  message?: string;
+  periodLabel?: string;
+  etbRate: number;
+  totalUsd: number;
+  totalEtb: number;
+  totalApprovedTasks?: number;
+  byStaff?: PayrollStaffGroup[];
+  byClient?: PayrollClientGroup[];
+  tasks?: PayrollTaskItem[];
+  [key: string]: unknown;
+}
+
+export interface ClosePayrollCycleDto {
+  periodLabel: string;
+  etbRate: number;
+  paidOn?: string;
+}
+
+export interface PayrollCycle {
+  id: string;
+  periodLabel: string;
+  etbRate: number;
+  totalUsd: number;
+  totalEtb: number;
+  paidOn: string;
+  closedAt?: string;
+  tasks?: PayrollTaskItem[];
+  createdAt?: string;
+}
+

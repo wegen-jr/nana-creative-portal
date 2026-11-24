@@ -20,6 +20,12 @@ import {
   ChevronLeft,
   ChevronRight,
   Inbox,
+  Building2,
+  Briefcase,
+  Tags,
+  CheckSquare,
+  ClipboardCheck,
+  Wallet,
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 
@@ -29,36 +35,90 @@ interface NavItem {
   icon: React.ComponentType<{ className?: string }>;
 }
 
-const NAV_ITEMS: NavItem[] = [
+interface NavSection {
+  label?: string;
+  items: NavItem[];
+}
+
+const NAV_SECTIONS: NavSection[] = [
   {
-    name: "Overview",
-    href: "/admin",
-    icon: LayoutDashboard,
+    items: [
+      {
+        name: "Overview",
+        href: "/admin",
+        icon: LayoutDashboard,
+      },
+    ],
   },
   {
-    name: "Contact Requests",
-    href: "/admin/contacts",
-    icon: Inbox,
+    label: "Operations",
+    items: [
+      {
+        name: "Tasks",
+        href: "/admin/tasks",
+        icon: CheckSquare,
+      },
+      {
+        name: "Task Submissions",
+        href: "/admin/task-submissions",
+        icon: ClipboardCheck,
+      },
+      {
+        name: "Payroll (10th)",
+        href: "/admin/payroll",
+        icon: Wallet,
+      },
+    ],
   },
   {
-    name: "Manage Users",
-    href: "/admin/users",
-    icon: Users,
+    label: "Directory & Management",
+    items: [
+      {
+        name: "Companies",
+        href: "/admin/companies",
+        icon: Building2,
+      },
+      {
+        name: "Services",
+        href: "/admin/services",
+        icon: Briefcase,
+      },
+      {
+        name: "Pricing Tiers",
+        href: "/admin/tiers",
+        icon: Tags,
+      },
+    ],
   },
   {
-    name: "Blog Editor",
-    href: "/admin/blogs",
-    icon: FileEdit,
-  },
-  {
-    name: "Manage Partners",
-    href: "/admin/partners",
-    icon: Users2,
-  },
-  {
-    name: "TikTok Analytics",
-    href: "/admin/analytics",
-    icon: TrendingUp,
+    label: "Portal & Growth",
+    items: [
+      {
+        name: "Contact Requests",
+        href: "/admin/contacts",
+        icon: Inbox,
+      },
+      {
+        name: "Manage Users",
+        href: "/admin/users",
+        icon: Users,
+      },
+      {
+        name: "Blog Editor",
+        href: "/admin/blogs",
+        icon: FileEdit,
+      },
+      {
+        name: "Manage Partners",
+        href: "/admin/partners",
+        icon: Users2,
+      },
+      {
+        name: "TikTok Analytics",
+        href: "/admin/analytics",
+        icon: TrendingUp,
+      },
+    ],
   },
 ];
 
@@ -156,38 +216,51 @@ export default function AdminSidebar() {
           )}
         </div>
 
-        {/* MIDDLE: Decluttered Routing Links */}
-        <nav className="px-3 py-6 space-y-1.5">
-          {NAV_ITEMS.map((item) => {
-            const Icon = item.icon;
-            const active = isRouteActive(item.href);
+        {/* MIDDLE: Decluttered Routing Links Grouped by Section */}
+        <nav className="px-3 py-4 space-y-4 overflow-y-auto max-h-[calc(100vh-170px)]">
+          {NAV_SECTIONS.map((section, sIdx) => (
+            <div key={sIdx} className="space-y-1">
+              {section.label && (!collapsed || isMobileView) && (
+                <div className="px-3.5 pt-2 pb-1 text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest font-mono">
+                  {section.label}
+                </div>
+              )}
+              {section.label && collapsed && !isMobileView && (
+                <div className="my-2 border-t border-border-subtle/50 mx-2" />
+              )}
 
-            return (
-              <Link
-                key={item.href}
-                href={item.href}
-                onClick={() => setMobileOpen(false)}
-                title={collapsed && !isMobileView ? item.name : undefined}
-                className={`group flex items-center gap-3.5 px-3.5 py-3 rounded-xl text-xs sm:text-sm font-semibold transition-all duration-200 ${
-                  active
-                    ? "bg-brand-primary text-white border-l-4 border-brand-accent shadow-md shadow-[#0B3B24]/30"
-                    : "text-gray-500 dark:text-gray-300 hover:text-text-primary hover:bg-border-subtle/40 border-l-4 border-transparent hover:-translate-y-0.5"
-                }`}
-              >
-                <Icon
-                  className={`w-5 h-5 shrink-0 transition-colors ${
-                    active
-                      ? "text-brand-accent"
-                      : "text-gray-400 group-hover:text-brand-accent"
-                  }`}
-                />
+              {section.items.map((item) => {
+                const Icon = item.icon;
+                const active = isRouteActive(item.href);
 
-                {(!collapsed || isMobileView) && (
-                  <span className="flex-1 truncate">{item.name}</span>
-                )}
-              </Link>
-            );
-          })}
+                return (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    onClick={() => setMobileOpen(false)}
+                    title={collapsed && !isMobileView ? item.name : undefined}
+                    className={`group flex items-center gap-3.5 px-3.5 py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition-all duration-200 ${
+                      active
+                        ? "bg-brand-primary text-white border-l-4 border-brand-accent shadow-md shadow-[#0B3B24]/30"
+                        : "text-gray-500 dark:text-gray-300 hover:text-text-primary hover:bg-border-subtle/40 border-l-4 border-transparent hover:-translate-y-0.5"
+                    }`}
+                  >
+                    <Icon
+                      className={`w-4 h-4 shrink-0 transition-colors ${
+                        active
+                          ? "text-brand-accent"
+                          : "text-gray-400 group-hover:text-brand-accent"
+                      }`}
+                    />
+
+                    {(!collapsed || isMobileView) && (
+                      <span className="flex-1 truncate">{item.name}</span>
+                    )}
+                  </Link>
+                );
+              })}
+            </div>
+          ))}
         </nav>
       </div>
 
